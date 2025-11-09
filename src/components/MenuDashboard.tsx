@@ -247,10 +247,10 @@ const categoryIcons = {
 };
 
 const categoryColors = {
-  meals: "bg-orange-100 text-orange-700",
-  snacks: "bg-yellow-100 text-yellow-700",
-  drinks: "bg-blue-100 text-blue-700",
-  desserts: "bg-pink-100 text-pink-700",
+  meals: "bg-gradient-to-r from-orange-500 to-red-500 text-white",
+  snacks: "bg-gradient-to-r from-yellow-400 to-orange-400 text-white",
+  drinks: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white",
+  desserts: "bg-gradient-to-r from-pink-500 to-purple-500 text-white",
 };
 
 export default function MenuDashboard({ onOrderClick }: MenuDashboardProps) {
@@ -259,55 +259,59 @@ export default function MenuDashboard({ onOrderClick }: MenuDashboardProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pb-20">
       <div className="max-w-7xl mx-auto p-4 md:p-6">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Today's Menu</h2>
-          <p className="text-gray-600">Choose your favorite items</p>
+        {/* Hero Section */}
+        <div className="mb-12 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent mb-3">
+            Today's Menu
+          </h2>
+          <p className="text-gray-600 text-lg">Choose your favorite items & enjoy delicious food</p>
         </div>
 
         {categories.map((category) => {
           const items = menuItems.filter((item) => item.category === category);
           return (
-            <div key={category} className="mb-10">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-3xl">{categoryIcons[category]}</span>
-                <h3 className="text-2xl font-semibold capitalize text-gray-800">
+            <div key={category} className="mb-12">
+              <div className="flex items-center gap-3 mb-6 pb-3 border-b-2 border-gray-200">
+                <span className="text-4xl animate-bounce-slow">{categoryIcons[category]}</span>
+                <h3 className="text-3xl font-bold capitalize bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                   {category}
                 </h3>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {items.map((item) => (
                   <Card
                     key={item.id}
-                    className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                    className="overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group bg-white/80 backdrop-blur-sm"
                   >
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-52 overflow-hidden">
                       <img
                         src={item.image}
                         alt={item.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       <Badge
-                        className={`absolute top-3 right-3 ${categoryColors[item.category]}`}
+                        className={`absolute top-3 right-3 ${categoryColors[item.category]} border-0 shadow-lg px-3 py-1.5 font-semibold`}
                       >
                         {categoryIcons[item.category]} {item.category}
                       </Badge>
                     </div>
 
-                    <div className="p-4">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-1">
+                    <div className="p-5">
+                      <h4 className="text-xl font-bold text-gray-800 mb-2">
                         {item.name}
                       </h4>
-                      <p className="text-sm text-gray-600 mb-3">
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                         {item.description}
                       </p>
                       <div className="flex items-center justify-between">
-                        <span className="text-2xl font-bold text-orange-600">
+                        <span className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
                           ₹{item.price}
                         </span>
                         <Button
                           onClick={() => onOrderClick(item)}
-                          className="bg-orange-500 hover:bg-orange-600 text-white"
+                          className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                         >
                           Order Now
                         </Button>
