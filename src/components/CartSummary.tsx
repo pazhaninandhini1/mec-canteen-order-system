@@ -26,12 +26,14 @@ interface CartSummaryProps {
   items: OrderItem[];
   onRemoveItem: (id: string) => void;
   onClearCart: () => void;
+  onCheckout: () => void;
 }
 
 export default function CartSummary({
   items,
   onRemoveItem,
   onClearCart,
+  onCheckout,
 }: CartSummaryProps) {
   const [showThankYou, setShowThankYou] = useState(false);
 
@@ -46,8 +48,8 @@ export default function CartSummary({
       setShowThankYou(true);
       setTimeout(() => {
         setShowThankYou(false);
-        onClearCart();
-      }, 3000);
+        onCheckout();
+      }, 2000);
     }
   };
 

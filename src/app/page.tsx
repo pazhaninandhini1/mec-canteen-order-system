@@ -5,6 +5,7 @@ import LoginPage from "@/components/LoginPage";
 import MenuDashboard from "@/components/MenuDashboard";
 import OrderModal from "@/components/OrderModal";
 import CartSummary from "@/components/CartSummary";
+import RatingModal from "@/components/RatingModal";
 import type { MenuItem } from "@/components/MenuDashboard";
 import type { OrderItem } from "@/components/OrderModal";
 
@@ -13,8 +14,13 @@ export default function Home() {
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [cartItems, setCartItems] = useState<OrderItem[]>([]);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [checkoutItems, setCheckoutItems] = useState<OrderItem[]>([]);
+  const [itemRatings, setItemRatings] = useState<{
+    [key: string]: { rating: number; count: number };
+  }>({});
 
-  // Load cart from localStorage on mount
+  // Load cart and ratings from localStorage on mount
   useEffect(() => {
     const savedCart = localStorage.getItem("mecCanteenCart");
     if (savedCart) {
@@ -24,12 +30,26 @@ export default function Home() {
         console.error("Error loading cart:", error);
       }
     }
+
+    const savedRatings = localStorage.getItem("mecCanteenRatings");
+    if (savedRatings) {
+      try {
+        setItemRatings(JSON.parse(savedRatings));
+      } catch (error) {
+        console.error("Error loading ratings:", error);
+      }
+    }
   }, []);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("mecCanteenCart", JSON.stringify(cartItems));
   }, [cartItems]);
+
+  // Save ratings to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("mecCanteenRatings", JSON.stringify(itemRatings));
+  }, [itemRatings]);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
@@ -55,6 +75,46 @@ export default function Home() {
 
   const handleClearCart = () => {
     setCartItems([]);
+  };
+
+  const handleCheckout = () => {
+    // Store the items being checked out
+    setCheckoutItems([...cartItems]);
+    // Clear the cart
+    setCartItems([]);
+    // Open rating modal after a short delay
+    setTimeout(() => {
+      setIsRatingModalOpen(true);
+    }, 500);
+  };
+
+  const handleSubmitRatings = (
+    ratings: { itemId: string; rating: number; review?: string }[]
+  ) => {
+    // Update ratings for each item
+    const updatedRatings = { ...itemRatings };
+
+    ratings.forEach(({ itemId, rating }) => {
+      if (updatedRatings[itemId]) {
+        // Calculate new average
+        const currentTotal = updatedRatings[itemId].rating * updatedRatings[itemId].count;
+        const newCount = updatedRatings[itemId].count + 1;
+        const newAverage = (currentTotal + rating) / newCount;
+        updatedRatings[itemId] = {
+          rating: Math.round(newAverage * 10) / 10,
+          count: newCount,
+        };
+      } else {
+        // First rating for this item
+        updatedRatings[itemId] = {
+          rating,
+          count: 1,
+        };
+      }
+    });
+
+    setItemRatings(updatedRatings);
+    setCheckoutItems([]);
   };
 
   return (
@@ -89,7 +149,7 @@ export default function Home() {
         <LoginPage onLogin={handleLogin} />
       ) : (
         <>
-          <MenuDashboard onOrderClick={handleOrderClick} />
+          <MenuDashboard onOrderClick={handleOrderClick} itemRatings={itemRatings} />
           <OrderModal
             item={selectedItem}
             isOpen={isModalOpen}
@@ -100,6 +160,13 @@ export default function Home() {
             items={cartItems}
             onRemoveItem={handleRemoveItem}
             onClearCart={handleClearCart}
+            onCheckout={handleCheckout}
+          />
+          <RatingModal
+            isOpen={isRatingModalOpen}
+            onClose={() => setIsRatingModalOpen(false)}
+            items={checkoutItems}
+            onSubmitRatings={handleSubmitRatings}
           />
         </>
       )}

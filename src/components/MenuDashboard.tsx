@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import StarRating from "./StarRating";
 
 export interface MenuItem {
   id: string;
@@ -11,10 +12,13 @@ export interface MenuItem {
   category: "snacks" | "meals" | "drinks" | "desserts";
   description: string;
   image: string;
+  rating?: number;
+  reviewCount?: number;
 }
 
 interface MenuDashboardProps {
   onOrderClick: (item: MenuItem) => void;
+  itemRatings?: { [key: string]: { rating: number; count: number } };
 }
 
 const menuItems: MenuItem[] = [
@@ -253,7 +257,7 @@ const categoryColors = {
   desserts: "bg-gradient-to-r from-pink-500 to-purple-500 text-white",
 };
 
-export default function MenuDashboard({ onOrderClick }: MenuDashboardProps) {
+export default function MenuDashboard({ onOrderClick, itemRatings = {} }: MenuDashboardProps) {
   const categories = ["meals", "snacks", "drinks", "desserts"] as const;
 
   return (
@@ -279,46 +283,65 @@ export default function MenuDashboard({ onOrderClick }: MenuDashboardProps) {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {items.map((item) => (
-                  <Card
-                    key={item.id}
-                    className="overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group bg-white/80 backdrop-blur-sm"
-                  >
-                    <div className="relative h-52 overflow-hidden">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <Badge
-                        className={`absolute top-3 right-3 ${categoryColors[item.category]} border-0 shadow-lg px-3 py-1.5 font-semibold`}
-                      >
-                        {categoryIcons[item.category]} {item.category}
-                      </Badge>
-                    </div>
-
-                    <div className="p-5">
-                      <h4 className="text-xl font-bold text-gray-800 mb-2">
-                        {item.name}
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                        {item.description}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
-                          ₹{item.price}
-                        </span>
-                        <Button
-                          onClick={() => onOrderClick(item)}
-                          className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                {items.map((item) => {
+                  const ratingData = itemRatings[item.id];
+                  const rating = ratingData?.rating || 0;
+                  const reviewCount = ratingData?.count || 0;
+                  
+                  return (
+                    <Card
+                      key={item.id}
+                      className="overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group bg-white/80 backdrop-blur-sm"
+                    >
+                      <div className="relative h-52 overflow-hidden">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <Badge
+                          className={`absolute top-3 right-3 ${categoryColors[item.category]} border-0 shadow-lg px-3 py-1.5 font-semibold`}
                         >
-                          Order Now
-                        </Button>
+                          {categoryIcons[item.category]} {item.category}
+                        </Badge>
                       </div>
-                    </div>
-                  </Card>
-                ))}
+
+                      <div className="p-5">
+                        <div className="flex items-start justify-between mb-2">
+                          <h4 className="text-xl font-bold text-gray-800">
+                            {item.name}
+                          </h4>
+                        </div>
+                        
+                        {/* Star Rating Display */}
+                        {rating > 0 && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <StarRating rating={rating} readonly size="sm" showNumber />
+                            <span className="text-xs text-gray-500">
+                              ({reviewCount} {reviewCount === 1 ? "review" : "reviews"})
+                            </span>
+                          </div>
+                        )}
+                        
+                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                          {item.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
+                            ₹{item.price}
+                          </span>
+                          <Button
+                            onClick={() => onOrderClick(item)}
+                            className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                          >
+                            Order Now
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
               </div>
             </div>
           );
